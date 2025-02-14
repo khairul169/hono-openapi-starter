@@ -6,9 +6,9 @@ import { omit, uuid } from "@/lib/utils";
 import { uniqueError, paginate } from "@/db/utils";
 
 /**
- * Get all users
+ * List users
  */
-export const getAll: RouteHandler<typeof routes.getAll> = async (c) => {
+export const list: RouteHandler<typeof routes.list> = async (c) => {
   const { page, limit, search, sort, order } = c.req.valid("query");
 
   const query = db
@@ -21,6 +21,28 @@ export const getAll: RouteHandler<typeof routes.getAll> = async (c) => {
   const rows = omit(result, "password");
 
   return c.json({ total, page, limit, rows }, 200);
+};
+
+/**
+ * Get user
+ */
+export const get: RouteHandler<typeof routes.get> = async (c) => {
+  const { id } = c.req.valid("param");
+
+  const result = await db
+    .selectFrom("users")
+    .selectAll()
+    .where("id", "=", id)
+    .executeTakeFirst();
+
+  if (!result) {
+    throw new APIError("not_found", {
+      message: "User not found",
+      status: 404,
+    });
+  }
+
+  return c.json(omit(result, "password"), 200);
 };
 
 /**

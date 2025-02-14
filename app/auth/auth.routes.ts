@@ -31,7 +31,7 @@ export const login = createRoute({
 
 export const getUser = protectedRoute({
   operationId: "getUser",
-  tags: ["Users"],
+  tags: ["Auth"],
   method: "get",
   path: "/user",
   summary: "Get User",

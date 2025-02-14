@@ -27,7 +27,7 @@ describe("users", async () => {
     client.set("id", data.id);
   });
 
-  it("get all users", async () => {
+  it("list users", async () => {
     const res = await client.fetch("GET", "/");
     expect(res.ok).toBe(true);
 
@@ -36,15 +36,22 @@ describe("users", async () => {
     expect(data.rows[0].id).toBeTruthy();
   });
 
+  it("get user", async () => {
+    const { id } = client.store;
+    const res = await client.fetch("GET", `/${id}`);
+    expect(res.ok).toBe(true);
+
+    const data = await res.json();
+    expect(data.id).toBe(id);
+  });
+
   it("create user", async () => {
-    const id = client.get("id");
+    const { id } = client.store;
     expect(id).not.toBeEmpty();
   });
 
   it("update user", async () => {
-    const id = client.get("id");
-    expect(id).not.toBeEmpty();
-
+    const { id } = client.store;
     const body: z.infer<typeof UpdateUserSchema> = {
       name: faker.person.fullName(),
       email: faker.internet.email(),
@@ -61,8 +68,7 @@ describe("users", async () => {
   });
 
   it("delete user", async () => {
-    const id = client.get("id");
-    expect(id).not.toBeEmpty();
+    const { id } = client.store;
     const res = await client.fetch("DELETE", `/${id}`);
     expect(res.ok).toBe(true);
   });

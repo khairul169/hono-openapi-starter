@@ -12,8 +12,8 @@ import {
   paginatedSchema,
 } from "@/lib/schema";
 
-export const getAll = protectedRoute({
-  operationId: "getAll",
+export const list = protectedRoute({
+  operationId: "list",
   tags: ["Users"],
   method: "get",
   path: "/",
@@ -27,12 +27,28 @@ export const getAll = protectedRoute({
   },
 });
 
+export const get = protectedRoute({
+  operationId: "get",
+  tags: ["Users"],
+  method: "get",
+  path: "/:id",
+  summary: "Get",
+  description: "Get user by id",
+  request: {
+    params: IDRequestParams,
+  },
+  responses: {
+    200: jsonContent(UserSchema, "OK"),
+    404: NotFoundErrorSchema,
+  },
+});
+
 export const create = protectedRoute({
   operationId: "create",
   tags: ["Users"],
   method: "post",
   path: "/",
-  summary: "Create User",
+  summary: "Create",
   description: "Create a new user",
   request: {
     body: jsonContent(CreateUserSchema, "Request body"),
@@ -51,7 +67,7 @@ export const update = protectedRoute({
   tags: ["Users"],
   method: "put",
   path: "/:id",
-  summary: "Update User",
+  summary: "Update",
   description: "Update existing user",
   request: {
     params: IDRequestParams,
@@ -72,7 +88,7 @@ export const remove = protectedRoute({
   tags: ["Users"],
   method: "delete",
   path: "/:id",
-  summary: "Delete User",
+  summary: "Delete",
   description: "Delete existing user",
   request: {
     params: IDRequestParams,
