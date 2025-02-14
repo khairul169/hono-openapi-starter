@@ -3,16 +3,22 @@
   "type": "module",
   "module": "index.ts",
   "scripts": {
+    "typecheck": "tsc --noEmit",
     "dev": "bun --watch run index.ts",
     "build": "bun build index.ts --outfile dist/main --compile --target bun --minify",
     "test": "bun test",
-    "db:push": "bunx --bun drizzle-kit push",
-    "db:seed": "bun run db/seed.ts"
+    "db:generate": "prisma generate",
+    "db:migrate:dev": "prisma migrate dev",
+    "db:push": "prisma db push",
+    "db:seed": "bun run db/seed.ts",
+    "db:reset": "prisma migrate reset --skip-generate && prisma db push && npm run db:seed"
   },
   "devDependencies": {
     "@faker-js/faker": "^9.5.0",
     "@types/bun": "^1.2.2",
-    "drizzle-kit": "^0.30.4"
+    "@types/pg": "^8.11.11",
+    "prisma": "^6.3.1",
+    "prisma-kysely": "^1.8.0"
   },
   "peerDependencies": {
     "typescript": "^5.7.3"
@@ -20,9 +26,11 @@
   "dependencies": {
     "@hono/zod-openapi": "^0.18.4",
     "@scalar/hono-api-reference": "^0.5.173",
-    "drizzle-orm": "^0.39.3",
-    "drizzle-zod": "^0.7.0",
     "hono": "4.7.1",
-    "postgres": "^3.4.5"
+    "kysely": "^0.27.5",
+    "pg": "^8.13.3"
+  },
+  "prisma": {
+    "schema": "db/schema.prisma"
   }
 }

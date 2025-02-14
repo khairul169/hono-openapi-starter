@@ -1,23 +1,21 @@
 import { type RouteHandler } from "@hono/zod-openapi";
 import * as routes from "./users.routes";
 import db from "@/db";
-import { eq, ilike } from "drizzle-orm";
 import { APIError } from "@/lib/types";
-import { omit } from "@/lib/utils";
-import { users } from "@/db/schema";
-import { and, isUniqueConstraintError, paginate } from "@/db/utils";
+import { omit, uuid } from "@/lib/utils";
+import { uniqueError, paginate } from "@/db/utils";
 
 /**
  * Get all users
  */
 export const getAll: RouteHandler<typeof routes.getAll> = async (c) => {
-  const { page, limit, search } = c.req.valid("query");
+  const { page, limit, search, sort, order } = c.req.valid("query");
 
   const query = db
-    .select()
-    .from(users)
-    .where(and(search && ilike(users.email, `%${search}%`)))
-    .$dynamic();
+    .selectFrom("users")
+    .selectAll()
+    .orderBy(sort, order)
+    .$if(!!search, (q) => q.where("email", "ilike", `%${search}%`));
 
   const [result, total] = await paginate(query, page, limit);
   const rows = omit(result, "password");
@@ -35,21 +33,15 @@ export const create: RouteHandler<typeof routes.create> = async (c) => {
       ? await Bun.password.hash(data.password)
       : null;
 
-    const [result] = await db
-      .insert(users)
-      .values({ ...data, password })
-      .returning();
+    const result = await db
+      .insertInto("users")
+      .values({ id: uuid(), ...data, password })
+      .returningAll()
+      .executeTakeFirstOrThrow();
 
-    if (!result) {
-      throw new APIError("not_found", {
-        message: "User not found",
-        status: 404,
-      });
-    }
-
-    return c.json(result, 201);
+    return c.json(omit(result, "password"), 201);
   } catch (err) {
-    if (isUniqueConstraintError(err)) {
+    if (uniqueError(err)) {
       throw new APIError("user_exists", {
         message: "Email address already registered",
         status: 400,
@@ -70,11 +62,12 @@ export const update: RouteHandler<typeof routes.update> = async (c) => {
       ? await Bun.password.hash(data.password)
       : undefined;
 
-    const [result] = await db
-      .update(users)
+    const result = await db
+      .updateTable("users")
       .set({ ...data, password })
-      .where(eq(users.id, id))
-      .returning();
+      .where("id", "=", id)
+      .returningAll()
+      .executeTakeFirstOrThrow();
 
     if (!result) {
       throw new APIError("not_found", {
@@ -83,9 +76,9 @@ export const update: RouteHandler<typeof routes.update> = async (c) => {
       });
     }
 
-    return c.json(result, 200);
+    return c.json(omit(result, "password"), 200);
   } catch (err) {
-    if (isUniqueConstraintError(err)) {
+    if (uniqueError(err)) {
       throw new APIError("user_exists", {
         message: "Email address already registered",
         status: 400,
@@ -100,7 +93,11 @@ export const update: RouteHandler<typeof routes.update> = async (c) => {
  */
 export const remove: RouteHandler<typeof routes.remove> = async (c) => {
   const { id } = c.req.valid("param");
-  const [result] = await db.delete(users).where(eq(users.id, id)).returning();
+  const result = await db
+    .deleteFrom("users")
+    .where("id", "=", id)
+    .returningAll()
+    .executeTakeFirstOrThrow();
 
   if (!result) {
     throw new APIError("not_found", {

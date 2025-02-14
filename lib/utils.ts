@@ -1,7 +1,7 @@
 import { randomUUIDv7 } from "bun";
 import { randomUUID } from "node:crypto";
 
-export const uuidv7 = () => randomUUIDv7();
+export const uuid = () => randomUUIDv7();
 export const uuidv4 = () => randomUUID();
 
 export function md5(text: string) {

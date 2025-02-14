@@ -1,10 +1,15 @@
 import { z } from "@hono/zod-openapi";
 import { PaginationSchema } from "@/lib/schema";
-import { createInsertSchema, createSelectSchema } from "drizzle-zod";
-import { schema } from "@/db";
 
-export const UserSchema = createSelectSchema(schema.users)
-  .omit({ password: true })
+export const UserSchema = z
+  .object({
+    id: z.string().uuid(),
+    name: z.string().min(3),
+    email: z.string().email(),
+    isActive: z.boolean().default(true),
+    createdAt: z.string().datetime(),
+    updatedAt: z.string().datetime(),
+  })
   .openapi("User");
 
 export const GetUsersQuerySchema = z
@@ -13,12 +18,14 @@ export const GetUsersQuerySchema = z
       .string()
       .openapi({ description: "Find users by email" })
       .nullish(),
+    sort: UserSchema.keyof().default("name"),
+    order: z.enum(["asc", "desc"]).default("asc"),
   })
   .merge(PaginationSchema);
 
-export const UpdateUserSchema = createInsertSchema(schema.users, {
-  email: (t) => t.min(3),
-}).omit({
+export const UpdateUserSchema = UserSchema.merge(
+  z.object({ password: z.string().nullish() })
+).omit({
   id: true,
   createdAt: true,
   updatedAt: true,

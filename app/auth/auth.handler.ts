@@ -1,7 +1,6 @@
 import { type RouteHandler } from "@hono/zod-openapi";
 import * as routes from "./auth.routes";
 import db from "@/db";
-import { and, eq } from "drizzle-orm";
 import { password } from "bun";
 import * as jwt from "hono/jwt";
 import { md5, omit } from "@/lib/utils";
@@ -13,9 +12,11 @@ import env from "@/lib/env";
  */
 export const login: RouteHandler<typeof routes.login> = async (c) => {
   const data = c.req.valid("json");
-  const user = await db.query.users.findFirst({
-    where: (t) => and(eq(t.email, data.email)),
-  });
+  const user = await db
+    .selectFrom("users")
+    .selectAll()
+    .where("email", "=", data.email)
+    .executeTakeFirst();
 
   try {
     if (!user || !user.password) {
@@ -53,9 +54,11 @@ export const login: RouteHandler<typeof routes.login> = async (c) => {
  */
 export const getUser: RouteHandler<typeof routes.getUser> = async (c) => {
   const user = c.get("user");
-  const data = await db.query.users.findFirst({
-    where: (t) => eq(t.id, user.id),
-  });
+  const data = await db
+    .selectFrom("users")
+    .selectAll()
+    .where("id", "=", user.id)
+    .executeTakeFirst();
 
   if (!data) {
     throw new APIError("user_not_found", {

@@ -1,10 +1,10 @@
 import { describe, it, expect } from "bun:test";
-import { md5, omit, uuidv4, uuidv7 } from "./utils";
+import { md5, omit, uuidv4, uuid } from "./utils";
 import { z } from "@hono/zod-openapi";
 
 describe("utils", () => {
-  it("returns uuidv7", () => {
-    const res = uuidv7();
+  it("returns uuid", () => {
+    const res = uuid();
     const { success } = z.string().uuid().safeParse(res);
     expect(success).toBeTrue();
   });

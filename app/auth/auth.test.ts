@@ -1,6 +1,8 @@
 import { describe, it, expect, beforeAll } from "bun:test";
 import TestClient from "@/lib/tests";
 import route from "./auth.index";
+import { z } from "@hono/zod-openapi";
+import { LoginRequestSchema } from "./auth.schema";
 
 describe("auth", async () => {
   const client = new TestClient(route, "/auth");
@@ -14,7 +16,7 @@ describe("auth", async () => {
   });
 
   it("login failed (invalid credentials)", async () => {
-    const body = {
+    const body: z.infer<typeof LoginRequestSchema> = {
       email: "arandommail@email.com",
       password: crypto.randomUUID(),
     };

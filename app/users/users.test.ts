@@ -1,7 +1,9 @@
 import { describe, it, expect, beforeAll } from "bun:test";
 import { faker } from "@faker-js/faker";
 import TestClient from "@/lib/tests";
+import { z } from "@hono/zod-openapi";
 import route from "./users.index";
+import { CreateUserSchema, UpdateUserSchema } from "./users.schema";
 
 describe("users", async () => {
   const client = new TestClient<{ id: string }>(route, "/users");
@@ -10,16 +12,18 @@ describe("users", async () => {
     await client.login();
 
     // create new user
-    const body = {
+    const body: z.infer<typeof CreateUserSchema> = {
+      name: faker.person.fullName(),
       email: faker.internet.email(),
       password: faker.internet.password(),
     };
     const res = await client.fetch("POST", "/", { body });
-    expect(res.ok).toBe(true);
-
     const data = await res.json();
+
+    expect(res.status).toBe(201);
     expect(data.id).toBeTruthy();
     expect(data.email).toBe(body.email);
+
     client.set("id", data.id);
   });
 
@@ -41,7 +45,8 @@ describe("users", async () => {
     const id = client.get("id");
     expect(id).not.toBeEmpty();
 
-    const body = {
+    const body: z.infer<typeof UpdateUserSchema> = {
+      name: faker.person.fullName(),
       email: faker.internet.email(),
       password: faker.internet.password(),
       isActive: false,
