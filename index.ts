@@ -3,9 +3,7 @@ import createApp, { setupOpenAPI, setupRoutes } from "./app";
 
 const app = createApp();
 await setupRoutes(app);
-
-// Configure api docs
-setupOpenAPI(app);
+await setupOpenAPI(app);
 
 if (!env.DEV) {
   console.log(`Server started!\thttp://localhost:${env.PORT}\n`);

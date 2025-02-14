@@ -7,6 +7,7 @@ import env from "@/lib/env";
 import { apiReference } from "@scalar/hono-api-reference";
 import routes from "./routes";
 import { UnauthorizedErrorSchema } from "@/lib/schema";
+import AuthRepository from "./auth/auth.repo";
 
 export function createRouter() {
   return new OpenAPIHono({
@@ -35,7 +36,7 @@ export function protectedRoute<
   return createRoute({
     ...route,
     middleware: [auth(), ...middleware] as const,
-    security: [...(route.security || []), { bearer: [] }] as const,
+    security: [...(route.security || []), { bearerAuth: [] }] as const,
     responses: {
       401: UnauthorizedErrorSchema,
       ...route.responses,
@@ -66,8 +67,13 @@ export async function setupRoutes(app: ReturnType<typeof createApp>) {
   }
 }
 
-export function setupOpenAPI(app: OpenAPIHono) {
+export async function setupOpenAPI(app: OpenAPIHono) {
   const specUrl = "/openapi.json";
+
+  // Prefill default auth token
+  const authRepo = new AuthRepository();
+  const user = env.DEV ? await authRepo.findUser("admin@mail.com") : undefined;
+  const defaultAuthToken = user ? await authRepo.createJwt(user) : "";
 
   app.doc(specUrl, (c) => ({
     openapi: "3.0.0",
@@ -93,12 +99,16 @@ export function setupOpenAPI(app: OpenAPIHono) {
         clientKey: "fetch",
       },
       authentication: {
-        preferredSecurityScheme: "bearer",
+        preferredSecurityScheme: "bearerAuth",
+        http: {
+          basic: { username: "", password: "" },
+          bearer: { token: defaultAuthToken },
+        },
       },
     })
   );
 
-  app.openAPIRegistry.registerComponent("securitySchemes", "bearer", {
+  app.openAPIRegistry.registerComponent("securitySchemes", "bearerAuth", {
     type: "http",
     scheme: "bearer",
     bearerFormat: "JWT",

@@ -1,22 +1,18 @@
 import { type RouteHandler } from "@hono/zod-openapi";
 import * as routes from "./auth.routes";
-import db from "@/db";
 import { password } from "bun";
-import * as jwt from "hono/jwt";
 import { md5, omit } from "@/lib/utils";
 import { APIError } from "@/lib/types";
-import env from "@/lib/env";
+import AuthRepository from "./auth.repo";
+import UsersRepository from "../users/users.repo";
 
 /**
  * Login
  */
 export const login: RouteHandler<typeof routes.login> = async (c) => {
+  const repo = new AuthRepository();
   const data = c.req.valid("json");
-  const user = await db
-    .selectFrom("users")
-    .selectAll()
-    .where("email", "=", data.email)
-    .executeTakeFirst();
+  const user = await repo.findUser(data.email);
 
   try {
     if (!user || !user.password) {
@@ -43,22 +39,21 @@ export const login: RouteHandler<typeof routes.login> = async (c) => {
     });
   }
 
-  // create auth token
-  const token = await jwt.sign({ id: user.id }, env.JWT_SECRET);
+  const res = {
+    token: await repo.createJwt(user),
+    user: omit(user, "password"),
+  };
 
-  return c.json({ token, user: omit(user, "password") }, 200);
+  return c.json(res, 200);
 };
 
 /**
  * Get authenticated user
  */
 export const getUser: RouteHandler<typeof routes.getUser> = async (c) => {
+  const repo = new UsersRepository();
   const user = c.get("user");
-  const data = await db
-    .selectFrom("users")
-    .selectAll()
-    .where("id", "=", user.id)
-    .executeTakeFirst();
+  const data = await repo.get(user.id);
 
   if (!data) {
     throw new APIError("user_not_found", {
