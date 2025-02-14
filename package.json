@@ -1,0 +1,25 @@
+{
+  "name": "backend",
+  "type": "module",
+  "module": "index.ts",
+  "scripts": {
+    "dev": "bun --watch run index.ts",
+    "db:push": "bunx --bun drizzle-kit push",
+    "db:seed": "bun run db/seed.ts"
+  },
+  "devDependencies": {
+    "@types/bun": "^1.2.2",
+    "drizzle-kit": "^0.30.4",
+    "postgres": "^3.4.5"
+  },
+  "peerDependencies": {
+    "typescript": "^5.7.3"
+  },
+  "dependencies": {
+    "@hono/zod-openapi": "^0.18.4",
+    "@scalar/hono-api-reference": "^0.5.173",
+    "drizzle-orm": "^0.39.1",
+    "drizzle-zod": "^0.7.0",
+    "hono": "4.6.20"
+  }
+}
