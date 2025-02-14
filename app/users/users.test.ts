@@ -38,6 +38,10 @@ describe("users", async () => {
     }
   });
 
+  it("create user", async () => {
+    expect(id).not.toBeEmpty();
+  });
+
   it("update user", async () => {
     expect(id).not.toBeEmpty();
 
