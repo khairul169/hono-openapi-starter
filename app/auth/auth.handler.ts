@@ -4,8 +4,9 @@ import db from "@/db";
 import { and, eq } from "drizzle-orm";
 import { password } from "bun";
 import * as jwt from "hono/jwt";
-import { md5 } from "@/lib/utils";
+import { md5, omit } from "@/lib/utils";
 import { APIError } from "@/lib/types";
+import env from "@/lib/env";
 
 /**
  * Login
@@ -42,7 +43,7 @@ export const login: RouteHandler<typeof routes.login> = async (c) => {
   }
 
   // create auth token
-  const token = await jwt.sign({ id: user.id }, process.env.JWT_SECRET!);
+  const token = await jwt.sign({ id: user.id }, env.JWT_SECRET);
 
-  return c.json({ token, user: { ...user, password: undefined } }, 200);
+  return c.json({ token, user: omit(user, "password") }, 200);
 };

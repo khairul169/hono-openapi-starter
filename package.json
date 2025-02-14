@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "bun --watch run index.ts",
     "build": "bun build index.ts --outfile dist/main --compile --target bun --minify",
+    "test": "bun test",
     "db:push": "bunx --bun drizzle-kit push",
     "db:seed": "bun run db/seed.ts"
   },

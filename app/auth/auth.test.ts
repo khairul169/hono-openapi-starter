@@ -4,10 +4,10 @@ import route from "./auth.index";
 import { testClient } from "hono/testing";
 
 describe("auth", async () => {
-  const app = testClient(createApp().route("/", route));
+  const client = testClient(createApp().route("/", route)).auth;
 
   it("login successfully", async () => {
-    const res = await app.auth.login.$post({
+    const res = await client.login.$post({
       json: {
         email: "admin@mail.com",
         password: "123456",
@@ -23,7 +23,7 @@ describe("auth", async () => {
   });
 
   it("login failed (invalid credentials)", async () => {
-    const res = await app.auth.login.$post({
+    const res = await client.login.$post({
       json: {
         email: "arandommail@email.com",
         password: crypto.randomUUID(),

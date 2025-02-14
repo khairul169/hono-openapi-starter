@@ -5,11 +5,11 @@ import { testClient } from "hono/testing";
 import tests from "@/lib/tests";
 
 describe("users", async () => {
-  const app = testClient(createApp().route("/", route));
+  const client = testClient(createApp().route("/", route)).users;
   const { headers } = await tests.login();
 
   it("get authed user", async () => {
-    const res = await app.users.me.$get({}, { headers });
+    const res = await client.me.$get({}, { headers });
     expect(res.ok).toBe(true);
 
     if (res.ok) {
@@ -19,7 +19,7 @@ describe("users", async () => {
   });
 
   it("get all users", async () => {
-    const res = await app.users.$get({ query: {} }, { headers });
+    const res = await client.$get({ query: {} }, { headers });
     expect(res.ok).toBe(true);
 
     if (res.ok) {

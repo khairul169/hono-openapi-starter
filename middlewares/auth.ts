@@ -1,6 +1,7 @@
 import { createMiddleware } from "hono/factory";
 import * as jwt from "hono/jwt";
 import { APIError, JWTUser } from "../lib/types";
+import env from "@/lib/env";
 
 export const jwtMiddleware = createMiddleware(async (c, next) => {
   const token = c.req.header("authorization")?.split(" ")?.[1];
@@ -9,10 +10,7 @@ export const jwtMiddleware = createMiddleware(async (c, next) => {
   }
 
   try {
-    const data = (await jwt.verify(
-      token,
-      process.env.JWT_SECRET!
-    )) as never as JWTUser;
+    const data = (await jwt.verify(token, env.JWT_SECRET)) as never as JWTUser;
 
     if (!data) {
       throw new Error("Could not verify token");
