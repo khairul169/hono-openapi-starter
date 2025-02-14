@@ -29,3 +29,10 @@ export const paginatedSchema = <T extends z.ZodSchema>(schema: T) => {
     rows: z.array(schema),
   });
 };
+
+export const IDRequestParams = z.object({ id: z.string().uuid() });
+
+export const NotFoundErrorSchema = errorContent(404, {
+  code: "not_found",
+  message: "Resource not found",
+});

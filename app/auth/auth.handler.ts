@@ -47,3 +47,22 @@ export const login: RouteHandler<typeof routes.login> = async (c) => {
 
   return c.json({ token, user: omit(user, "password") }, 200);
 };
+
+/**
+ * Get authenticated user
+ */
+export const getUser: RouteHandler<typeof routes.getUser> = async (c) => {
+  const user = c.get("user");
+  const data = await db.query.users.findFirst({
+    where: (t) => eq(t.id, user.id),
+  });
+
+  if (!data) {
+    throw new APIError("user_not_found", {
+      message: "User not found",
+      status: 404,
+    });
+  }
+
+  return c.json(omit(data, "password"), 200);
+};

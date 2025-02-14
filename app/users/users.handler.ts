@@ -5,7 +5,7 @@ import { eq, ilike } from "drizzle-orm";
 import { APIError } from "@/lib/types";
 import { omit } from "@/lib/utils";
 import { users } from "@/db/schema";
-import { and, paginate } from "@/db/utils";
+import { and, isUniqueConstraintError, paginate } from "@/db/utils";
 
 /**
  * Get all users
@@ -26,20 +26,88 @@ export const getAll: RouteHandler<typeof routes.getAll> = async (c) => {
 };
 
 /**
- * Get authenticated user
+ * Create new user
  */
-export const getUser: RouteHandler<typeof routes.getUser> = async (c) => {
-  const user = c.get("user");
-  const data = await db.query.users.findFirst({
-    where: (t) => eq(t.id, user.id),
-  });
+export const create: RouteHandler<typeof routes.create> = async (c) => {
+  try {
+    const data = c.req.valid("json");
+    const password = data.password
+      ? await Bun.password.hash(data.password)
+      : null;
 
-  if (!data) {
-    throw new APIError("user_not_found", {
+    const [result] = await db
+      .insert(users)
+      .values({ ...data, password })
+      .returning();
+
+    if (!result) {
+      throw new APIError("not_found", {
+        message: "User not found",
+        status: 404,
+      });
+    }
+
+    return c.json(result, 201);
+  } catch (err) {
+    if (isUniqueConstraintError(err)) {
+      throw new APIError("user_exists", {
+        message: "Email address already registered",
+        status: 400,
+      });
+    }
+    throw err;
+  }
+};
+
+/**
+ * Update user
+ */
+export const update: RouteHandler<typeof routes.update> = async (c) => {
+  try {
+    const { id } = c.req.valid("param");
+    const data = c.req.valid("json");
+    const password = data.password
+      ? await Bun.password.hash(data.password)
+      : undefined;
+
+    const [result] = await db
+      .update(users)
+      .set({ ...data, password })
+      .where(eq(users.id, id))
+      .returning();
+
+    if (!result) {
+      throw new APIError("not_found", {
+        message: "User not found",
+        status: 404,
+      });
+    }
+
+    return c.json(result, 200);
+  } catch (err) {
+    if (isUniqueConstraintError(err)) {
+      throw new APIError("user_exists", {
+        message: "Email address already registered",
+        status: 400,
+      });
+    }
+    throw err;
+  }
+};
+
+/**
+ * Delete user
+ */
+export const remove: RouteHandler<typeof routes.remove> = async (c) => {
+  const { id } = c.req.valid("param");
+  const [result] = await db.delete(users).where(eq(users.id, id)).returning();
+
+  if (!result) {
+    throw new APIError("not_found", {
       message: "User not found",
       status: 404,
     });
   }
 
-  return c.json(omit(data, "password"), 200);
+  return c.body(null, 204);
 };

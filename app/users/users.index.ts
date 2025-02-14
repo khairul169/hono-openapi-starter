@@ -5,4 +5,6 @@ import { createRouter } from "../app";
 export default createRouter()
   .basePath("/users")
   .openapi(routes.getAll, handler.getAll)
-  .openapi(routes.getUser, handler.getUser);
+  .openapi(routes.create, handler.create)
+  .openapi(routes.update, handler.update)
+  .openapi(routes.remove, handler.remove);

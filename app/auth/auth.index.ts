@@ -4,4 +4,5 @@ import { createRouter } from "../app";
 
 export default createRouter()
   .basePath("/auth")
-  .openapi(routes.login, handler.login);
+  .openapi(routes.login, handler.login)
+  .openapi(routes.getUser, handler.getUser);

@@ -2,6 +2,8 @@ import { createRoute, z } from "@hono/zod-openapi";
 import { LoginRequestSchema, LoginResponseSchema } from "./auth.schema";
 import { errorContent, jsonContent } from "@/lib/types";
 import { ValidationErrorSchema } from "@/lib/schema";
+import { UserSchema } from "../users/users.schema";
+import { protectedRoute } from "../app";
 
 export const login = createRoute({
   operationId: "login",
@@ -24,5 +26,17 @@ export const login = createRoute({
       message: "User is inactive",
     }),
     422: ValidationErrorSchema,
+  },
+});
+
+export const getUser = protectedRoute({
+  operationId: "getUser",
+  tags: ["Users"],
+  method: "get",
+  path: "/user",
+  summary: "Get User",
+  description: "Get current authenticated user",
+  responses: {
+    200: jsonContent(UserSchema, "OK"),
   },
 });

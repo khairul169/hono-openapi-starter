@@ -10,12 +10,15 @@ import { PgSelect, timestamp, uuid } from "drizzle-orm/pg-core";
 import { uuidv7 } from "../lib/utils";
 import db, { DBSchema } from ".";
 
+export const createdAt = timestamp().notNull().defaultNow();
+export const updatedAt = timestamp()
+  .notNull()
+  .defaultNow()
+  .$onUpdate(() => new Date());
+
 export const timestamps = {
-  createdAt: timestamp().notNull().defaultNow(),
-  updatedAt: timestamp()
-    .notNull()
-    .defaultNow()
-    .$onUpdate(() => sql`NOW()`),
+  createdAt,
+  updatedAt,
 };
 
 export const softDeletes = {
@@ -52,4 +55,8 @@ export const paginate = async <T extends PgSelect>(
   const [total] = await qb;
 
   return [rows, total?.count, ids] as const;
+};
+
+export const isUniqueConstraintError = (err: unknown) => {
+  return (err as Error).message?.includes("unique constraint");
 };

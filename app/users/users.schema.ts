@@ -15,3 +15,15 @@ export const GetUsersQuerySchema = z
       .nullish(),
   })
   .merge(PaginationSchema);
+
+export const UpdateUserSchema = createSelectSchema(schema.users, {
+  email: (t) => t.min(3),
+}).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const CreateUserSchema = UpdateUserSchema.omit({
+  isActive: true,
+});
