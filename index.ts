@@ -1,5 +1,5 @@
 import env from "./lib/env";
-import createApp, { setupOpenAPI, setupRoutes } from "./app/app";
+import createApp, { setupOpenAPI, setupRoutes } from "./app";
 
 const app = createApp();
 await setupRoutes(app);

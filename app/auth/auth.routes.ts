@@ -3,7 +3,7 @@ import { LoginRequestSchema, LoginResponseSchema } from "./auth.schema";
 import { errorContent, jsonContent } from "@/lib/types";
 import { ValidationErrorSchema } from "@/lib/schema";
 import { UserSchema } from "../users/users.schema";
-import { protectedRoute } from "../app";
+import { protectedRoute } from "@/app";
 
 export const login = createRoute({
   operationId: "login",

@@ -1,6 +1,6 @@
 import { z } from "@hono/zod-openapi";
 import { PaginationSchema } from "@/lib/schema";
-import { createSelectSchema } from "drizzle-zod";
+import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { schema } from "@/db";
 
 export const UserSchema = createSelectSchema(schema.users)
@@ -16,7 +16,7 @@ export const GetUsersQuerySchema = z
   })
   .merge(PaginationSchema);
 
-export const UpdateUserSchema = createSelectSchema(schema.users, {
+export const UpdateUserSchema = createInsertSchema(schema.users, {
   email: (t) => t.min(3),
 }).omit({
   id: true,

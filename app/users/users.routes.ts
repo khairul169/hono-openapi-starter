@@ -5,7 +5,7 @@ import {
   UserSchema,
 } from "./users.schema";
 import { errorContent, jsonContent } from "@/lib/types";
-import { protectedRoute } from "@/app/app";
+import { protectedRoute } from "@/app";
 import {
   NotFoundErrorSchema,
   IDRequestParams,

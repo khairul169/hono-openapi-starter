@@ -1,6 +1,6 @@
 import * as routes from "./users.routes";
 import * as handler from "./users.handler";
-import { createRouter } from "../app";
+import { createRouter } from "..";
 
 export default createRouter()
   .basePath("/users")
