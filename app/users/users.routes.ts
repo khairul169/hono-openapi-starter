@@ -1,6 +1,6 @@
 import { GetUsersQuerySchema, UserSchema } from "./users.schema";
 import { jsonContent } from "@/lib/types";
-import { protectedRoute } from "@/app/route";
+import { protectedRoute } from "@/app/app";
 import { paginatedSchema } from "@/lib/schema";
 
 export const getAll = protectedRoute({

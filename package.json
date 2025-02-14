@@ -4,13 +4,13 @@
   "module": "index.ts",
   "scripts": {
     "dev": "bun --watch run index.ts",
+    "build": "bun build index.ts --outfile dist/main --compile --target bun --minify",
     "db:push": "bunx --bun drizzle-kit push",
     "db:seed": "bun run db/seed.ts"
   },
   "devDependencies": {
     "@types/bun": "^1.2.2",
-    "drizzle-kit": "^0.30.4",
-    "postgres": "^3.4.5"
+    "drizzle-kit": "^0.30.4"
   },
   "peerDependencies": {
     "typescript": "^5.7.3"
@@ -20,6 +20,7 @@
     "@scalar/hono-api-reference": "^0.5.173",
     "drizzle-orm": "^0.39.3",
     "drizzle-zod": "^0.7.0",
-    "hono": "4.7.1"
+    "hono": "4.7.1",
+    "postgres": "^3.4.5"
   }
 }
